@@ -1,73 +1,117 @@
-//refer to ID:sagileo
-
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
-int strindex(char *str, char *pattern);         //在str串进行pattern串的模式匹配，返回第一个匹配子串的index，若无匹配子串返回-1
-void mygetstr(char *);                          //由终端输入得到字符串，以' '和'\n'分隔
-char* getsubstr(char *str, int index, int len); //从str[index]开始向后len长度取为子串，返回子串地址
-int strlen(char *str);                      //返回串str长度
+#define MAXSTRL 255
 
-int main(){
-    char *str, *substr, *res;
-    int i = 0, j = 1, index = -1;
-    str = (char *)malloc(100);
-    substr = (char *)malloc(100);
-    res = (char *)malloc(100); *res = 0;
-    mygetstr(str);
-    while(str[i] != 0){
-        while(str[i + j] != 0){
-            substr = getsubstr(str, i, j);
-            if(strindex(str + i + j, substr) == -1)
-                break;
-            else if(strlen(res) < strlen(substr)) {
-                res = substr;
-                index = i;
-            }
-            j++;
-        }
-        i++; j = 1;
-    }
-    printf("%s%s%d", res, *res ? " " : "", index);
+typedef unsigned char String[MAXSTRL+1];
+
+void InitStr(String S)
+{
+	S[0]=0;
+	S[1]='\0';
 }
 
-char* getsubstr(char *str, int index, int len){
-    char *substr;
-    int i;
-    substr = (char *)malloc(100);
-    for(i = 0; i < len; i++){
-        substr[i] = str[index + i];
-    }
-    substr[i] = 0;
-    return substr;
+int Index_KPM(String S,String T,int pos)
+{
+	int i=pos,j=1;
+	while(i<=S[0] && j<=T[0])
+	{
+		if(j==0 || S[i]==T[j])
+		{
+			i++;
+			j++;
+		}
+		else
+			j=Next(T,j);
+	}
+	if(j>T[0])
+		return i-T[0];
+	else
+		return 0;
 }
 
-int strindex(char *str, char *pattern){
-    int index, i = 0, j = 0, k = 0;
-    while(str[i] != 0){
-        while(str[i + j] == pattern[j] && pattern[j] != 0){
-            j++;
-        }
-        if(!pattern[j])
-            return i;
-        i++; j = 0;
-    }
-    return -1;
+int MaxIndex(String s,String t)
+{
+	int i=1;
+	int max=0;
+	int temp;
+	while(i<=s[0]-t[0]+1)
+	{
+		temp=Index_KPM(s,t,i);
+		//printf("temp=%d,max=%d\n",temp,max);
+		max=(temp>max)?temp:max;
+		//printf("new_max=%d\n",max);
+		i++;
+	}
+	return max;
 }
 
-int strlen(char *str){
-    int len = 0;
-    while(str[len] != 0)
-        len++;
-    return len;
+int Next(String T,int j)
+{
+	int next[T[0]];
+	int i=1,t=0;
+	next[1]=0;
+	while(i<T[0])
+	{
+		if(t==0 || T[i]==T[t])
+		{
+			i++;
+			t++;
+			next[i]=t;
+		}
+		else
+		t=next[t];
+	}
+	return next[j];
 }
 
+void DIY_strcpy(String s,String t,int pos,int n)	//copy n characters(after s[pos]) of s to t	
+{
+	int i=1;
+	t[0]=n;
+	for(i=1;i<=n;i++)
+		t[i]=s[pos+i-1];
+	t[++i]='\0';
+}
 
-void mygetstr(char *str){
-    char c;
-    int i = 0;
-    while((c = getchar()) != EOF && c != ' ' && c != '\n'){
-        str[i++] = c;
-    }
-    str[i] = 0;
+int main()
+{
+	String s,t;
+	char c;
+	int i=0,len,p,j;
+	int pos_1,pos_2;
+	InitStr(s);
+	InitStr(t);
+	while((c=getchar())!=EOF)
+	{
+		if(c=='\n')
+			break;
+		else
+			s[++i]=c;
+	}
+	s[++i]='\0';
+	s[0]=i;
+	len=i;
+
+	for(i=len/2;i>1;i--)		//i is the len of substr
+	{
+		for(j=0;j<=s[0]-i+1;j++)
+		{
+			//printf("i=%d,j=%d\n",i,j);
+			DIY_strcpy(s,t,j,i);
+			pos_1=Index_KPM(s,t,1);
+			pos_2=MaxIndex(s,t);
+			//printf("pos_1=%d,pos_2=%d\n",pos_1,pos_2);
+			if(pos_2-pos_1>=i)
+			{
+				for(p=1;p<=t[0];p++)
+					printf("%c",t[p]);
+				printf(" ");
+				printf("%d\n",pos_1-1);
+				return 1;
+			}
+		}
+	}
+	printf("-1\n");
+	return 0;
 }
