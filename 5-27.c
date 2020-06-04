@@ -46,8 +46,13 @@ CrossList CreatList(int row,int col)
 
     M.rhead=(OList*)malloc((row+1)*sizeof(OList));
     M.chead=(OList*)malloc((col+1)*sizeof(OList));
+    for(bit=0;bit<=row;bit++)
+        M.rhead[bit]=NULL;
+    for(bit=0;bit<=col;bit++)
+        M.chead[bit]=NULL;       //pointer must be initialized!!
 
     p=1,q=1,bit=0;
+
     while(p<=row)
     {
         c=getchar();
@@ -105,6 +110,10 @@ CrossList AddMatrix(CrossList M,CrossList N)
 
     S.rhead=(OList*)malloc((S.mu+1)*sizeof(OList));
     S.chead=(OList*)malloc((S.nu+1)*sizeof(OList));
+    for(p=0;p<=S.mu;p++)
+        S.rhead[p]=NULL;
+    for(p=0;p<=S.nu;p++)
+        S.chead[p]=NULL;    //pointer must be initialized!!
 
     for(p=1;p<=S.mu;p++)
     {
